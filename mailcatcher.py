@@ -40,7 +40,8 @@ except:
 
 for msg in mailbox.fetch(Q(from_=senderAddr)):
     Subject = msg.subject
-    logging.debug(f'Betreff {Subject}')
+    timestamp = msg.date
+    logging.debug(f'Betreff: {Subject} von {timestamp}')
     if len(msg.attachments) > 0:
         attachment = [i[0] for i in msg.attachments] + [i[1] for i in msg.attachments]
 
@@ -51,15 +52,20 @@ for msg in mailbox.fetch(Q(from_=senderAddr)):
             f.close()
             try:
                 mailbox.move(msg.uid, 'INBOX/processed')
+                logging.debug(f'Mail verschoben.')
+                continue
             except:
                 logging.debug(f'Mail mit dem Betreff {subject} konnte nicht verschoben werden')
+                continue
         else:
             logging.info(f'{attachment[0]} entspricht nicht dem Suchbegriff {fileExt}. Datei wurde nicht heruntergeladen')
             try:
                 mailbox.move(msg.uid, 'INBOX/rejected')
+                logging.debug(f'Mail verschoben.')
                 continue
             except:
                 logging.debug(f'Mail mit dem Betreff {subject} konnte nicht verschoben werden')
+                continue
     else:
         logging.debug(f'Mail hat keinen Anhang')
         try:
